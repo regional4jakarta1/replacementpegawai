@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import { doc, onSnapshot, setDoc } from 'firebase/firestore';
+import { toPng } from 'html-to-image';
 import { Upload, Download, FileSpreadsheet, AlertTriangle, CheckCircle2, EyeOff } from 'lucide-react';
 import { db, DASHBOARD_DOC_PATH } from './firebase';
 import { SEED_RECORDS, SEED_CANDIDATES } from './seedData';
@@ -188,24 +189,6 @@ function parseWorkbook(arrayBuffer) {
   return { headcountRecords, candidateRecords, hasCandidateSheet: !!kandidatSheetName };
 }
 
-function collectStylesheetText() {
-  let css = '';
-  for (const sheet of document.styleSheets) {
-    try {
-      for (const rule of sheet.cssRules) {
-        // @font-face nunjuk ke file font di Google Fonts (domain lain), dan itu
-        // bikin canvas "ternoda" (tainted) pas mau diexport jadi gambar. Di-skip
-        // aja, nanti fallback ke font standar biar exportnya jalan.
-        if (rule.type === CSSRule.FONT_FACE_RULE) continue;
-        css += rule.cssText + '\n';
-      }
-    } catch (e) {
-      // stylesheet cross-origin tanpa CORS (misal font pihak ketiga) -- lewatin aja
-    }
-  }
-  return css;
-}
-
 function ProgressRing({ pct, size = 136, stroke = 11, color = '#0B6E4F', label = 'terisi' }) {
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -378,58 +361,44 @@ export default function App() {
     if (!node || isExporting) return;
     setError(null);
     setIsExporting(true);
+
+    // Sembunyiin tombol-tombol & notifikasi dulu biar gak ikut kefoto,
+    // dan bentangin tabel yang ada scroll horizontalnya biar gak kepotong.
+    const toHide = node.querySelectorAll('.hc-header-actions, .hc-toast, .hc-error, .hc-col-toggle');
+    const prevDisplay = [];
+    toHide.forEach((el) => {
+      prevDisplay.push(el.style.display);
+      el.style.display = 'none';
+    });
+
+    const scrollWraps = node.querySelectorAll('.hc-table-scroll');
+    const prevOverflow = [];
+    scrollWraps.forEach((el) => {
+      prevOverflow.push(el.style.overflow);
+      el.style.overflow = 'visible';
+    });
+
     try {
-      const clone = node.cloneNode(true);
-      clone.querySelectorAll('.hc-header-actions, input[type="file"], .hc-toast, .hc-error, .hc-col-toggle').forEach((el) => el.remove());
-      clone.style.margin = '0';
-
       let maxTableWidth = 0;
-      clone.querySelectorAll('.hc-table-scroll').forEach((wrap) => {
-        wrap.style.overflow = 'visible';
-        const table = wrap.querySelector('table');
-        if (table) maxTableWidth = Math.max(maxTableWidth, table.scrollWidth);
+      node.querySelectorAll('.hc-table-scroll table').forEach((t) => {
+        maxTableWidth = Math.max(maxTableWidth, t.scrollWidth);
       });
-
       const rect = node.getBoundingClientRect();
-      const width = Math.max(Math.ceil(rect.width), maxTableWidth + 120);
-      const height = Math.ceil(rect.height);
-      clone.style.width = `${width}px`;
+      const targetWidth = Math.max(Math.ceil(rect.width), maxTableWidth + 120);
+      const targetHeight = Math.ceil(rect.height);
 
-      const htmlString = new XMLSerializer().serializeToString(clone);
-      const cssText =
-        collectStylesheetText() +
-        '\n.hc-root, .hc-root * { font-family: Arial, Helvetica, sans-serif !important; }';
-      const svgString =
-        `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">` +
-        `<foreignObject width="100%" height="100%">` +
-        `<div xmlns="http://www.w3.org/1999/xhtml"><style>${cssText}</style>${htmlString}</div>` +
-        `</foreignObject></svg>`;
-
-      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-      const svgUrl = URL.createObjectURL(svgBlob);
-
-      const img = new Image();
-      await new Promise((resolve, reject) => {
-        img.onload = resolve;
-        img.onerror = () => reject(new Error('Gagal memuat pratinjau dashboard.'));
-        img.src = svgUrl;
+      const dataUrl = await toPng(node, {
+        backgroundColor: '#EEF1EC',
+        pixelRatio: 2,
+        cacheBust: true,
+        width: targetWidth,
+        height: targetHeight,
+        style: { width: `${targetWidth}px` },
       });
 
-      const scale = 2;
-      const canvas = document.createElement('canvas');
-      canvas.width = width * scale;
-      canvas.height = height * scale;
-      const ctx = canvas.getContext('2d');
-      ctx.scale(scale, scale);
-      ctx.fillStyle = '#EEF1EC';
-      ctx.fillRect(0, 0, width, height);
-      ctx.drawImage(img, 0, 0, width, height);
-      URL.revokeObjectURL(svgUrl);
-
-      const pngUrl = canvas.toDataURL('image/png');
       const link = document.createElement('a');
       const todayStr = new Date().toISOString().slice(0, 10);
-      link.href = pngUrl;
+      link.href = dataUrl;
       link.download = `progres-headcount-${todayStr}.png`;
       link.click();
       setToast('Gambar dashboard berhasil diunduh.');
@@ -437,6 +406,8 @@ export default function App() {
       console.error(e);
       setError('Gagal membuat gambar. Kalau masih gagal, coba screenshot manual layar ini.');
     } finally {
+      toHide.forEach((el, i) => { el.style.display = prevDisplay[i]; });
+      scrollWraps.forEach((el, i) => { el.style.overflow = prevOverflow[i]; });
       setIsExporting(false);
     }
   }
