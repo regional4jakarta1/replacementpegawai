@@ -193,6 +193,10 @@ function collectStylesheetText() {
   for (const sheet of document.styleSheets) {
     try {
       for (const rule of sheet.cssRules) {
+        // @font-face nunjuk ke file font di Google Fonts (domain lain), dan itu
+        // bikin canvas "ternoda" (tainted) pas mau diexport jadi gambar. Di-skip
+        // aja, nanti fallback ke font standar biar exportnya jalan.
+        if (rule.type === CSSRule.FONT_FACE_RULE) continue;
         css += rule.cssText + '\n';
       }
     } catch (e) {
@@ -392,7 +396,9 @@ export default function App() {
       clone.style.width = `${width}px`;
 
       const htmlString = new XMLSerializer().serializeToString(clone);
-      const cssText = collectStylesheetText();
+      const cssText =
+        collectStylesheetText() +
+        '\n.hc-root, .hc-root * { font-family: Arial, Helvetica, sans-serif !important; }';
       const svgString =
         `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">` +
         `<foreignObject width="100%" height="100%">` +
