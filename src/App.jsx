@@ -362,38 +362,41 @@ export default function App() {
     setError(null);
     setIsExporting(true);
 
-    // Sembunyiin tombol-tombol & notifikasi dulu biar gak ikut kefoto,
-    // dan bentangin tabel yang ada scroll horizontalnya biar gak kepotong.
-    const toHide = node.querySelectorAll('.hc-header-actions, .hc-toast, .hc-error, .hc-col-toggle');
-    const prevDisplay = [];
-    toHide.forEach((el) => {
-      prevDisplay.push(el.style.display);
-      el.style.display = 'none';
-    });
-
-    const scrollWraps = node.querySelectorAll('.hc-table-scroll');
-    const prevOverflow = [];
-    scrollWraps.forEach((el) => {
-      prevOverflow.push(el.style.overflow);
-      el.style.overflow = 'visible';
-    });
-
+    let offscreenWrapper = null;
     try {
+      const clone = node.cloneNode(true);
+      clone.querySelectorAll('.hc-header-actions, input[type="file"], .hc-toast, .hc-error, .hc-col-toggle').forEach((el) => el.remove());
+      clone.querySelectorAll('.hc-table-scroll').forEach((el) => { el.style.overflow = 'visible'; });
+      clone.style.margin = '0';
+
+      // Tempel clone-nya di luar layar (gak keliatan sama sekali oleh user)
+      // biar browser beneran ngukur & nge-layout-in dia dengan benar.
+      offscreenWrapper = document.createElement('div');
+      offscreenWrapper.style.position = 'fixed';
+      offscreenWrapper.style.top = '0';
+      offscreenWrapper.style.left = '-99999px';
+      offscreenWrapper.style.zIndex = '-1';
+      offscreenWrapper.appendChild(clone);
+      document.body.appendChild(offscreenWrapper);
+
       let maxTableWidth = 0;
-      node.querySelectorAll('.hc-table-scroll table').forEach((t) => {
+      clone.querySelectorAll('.hc-table-scroll table').forEach((t) => {
         maxTableWidth = Math.max(maxTableWidth, t.scrollWidth);
       });
-      const rect = node.getBoundingClientRect();
-      const targetWidth = Math.max(Math.ceil(rect.width), maxTableWidth + 120);
-      const targetHeight = Math.ceil(rect.height);
+      const naturalWidth = clone.getBoundingClientRect().width;
+      const targetWidth = Math.max(Math.ceil(naturalWidth), maxTableWidth + 120);
 
-      const dataUrl = await toPng(node, {
+      // Lebarin clone-nya langsung (bukan lewat opsi library), biar dijamin kepake.
+      clone.style.maxWidth = 'none';
+      clone.style.width = `${targetWidth}px`;
+      const targetHeight = Math.ceil(clone.getBoundingClientRect().height);
+
+      const dataUrl = await toPng(clone, {
         backgroundColor: '#EEF1EC',
         pixelRatio: 2,
         cacheBust: true,
         width: targetWidth,
         height: targetHeight,
-        style: { width: `${targetWidth}px`, maxWidth: 'none' },
       });
 
       const link = document.createElement('a');
@@ -406,8 +409,7 @@ export default function App() {
       console.error(e);
       setError('Gagal membuat gambar. Kalau masih gagal, coba screenshot manual layar ini.');
     } finally {
-      toHide.forEach((el, i) => { el.style.display = prevDisplay[i]; });
-      scrollWraps.forEach((el, i) => { el.style.overflow = prevOverflow[i]; });
+      if (offscreenWrapper) offscreenWrapper.remove();
       setIsExporting(false);
     }
   }
