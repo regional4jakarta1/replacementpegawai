@@ -1,0 +1,32 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Sesuai pilihan lo: publik, siapa aja boleh baca DAN upload/replace data.
+    // Artinya siapa pun yang punya link web ini bisa ganti data dashboard.
+    match /headcount/{docId} {
+      allow read, write: if true;
+    }
+
+    // Semua path lain default ditolak.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+// Kalau nanti mau dibatasi (misal cuma tim HR yang boleh upload), gampang
+// diubah, contoh pola yang umum dipakai:
+//
+// match /headcount/{docId} {
+//   allow read: if true;
+//   allow write: if request.auth != null
+//     && request.auth.token.email in [
+//       'hr1@perusahaan.com',
+//       'hr2@perusahaan.com'
+//     ];
+// }
+//
+// Itu butuh nambahin Firebase Authentication (Email/Password atau Google
+// Sign-In) di project + halaman login sederhana di aplikasi. Tinggal bilang
+// aja kalau nanti mau upgrade ke arah situ.
