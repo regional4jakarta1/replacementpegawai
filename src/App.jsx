@@ -188,6 +188,20 @@ function parseWorkbook(arrayBuffer) {
   return { headcountRecords, candidateRecords, hasCandidateSheet: !!kandidatSheetName };
 }
 
+function collectStylesheetText() {
+  let css = '';
+  for (const sheet of document.styleSheets) {
+    try {
+      for (const rule of sheet.cssRules) {
+        css += rule.cssText + '\n';
+      }
+    } catch (e) {
+      // stylesheet cross-origin tanpa CORS (misal font pihak ketiga) -- lewatin aja
+    }
+  }
+  return css;
+}
+
 function ProgressRing({ pct, size = 136, stroke = 11, color = '#0B6E4F', label = 'terisi' }) {
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -378,10 +392,11 @@ export default function App() {
       clone.style.width = `${width}px`;
 
       const htmlString = new XMLSerializer().serializeToString(clone);
+      const cssText = collectStylesheetText();
       const svgString =
         `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">` +
         `<foreignObject width="100%" height="100%">` +
-        `<div xmlns="http://www.w3.org/1999/xhtml">${htmlString}</div>` +
+        `<div xmlns="http://www.w3.org/1999/xhtml"><style>${cssText}</style>${htmlString}</div>` +
         `</foreignObject></svg>`;
 
       const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
