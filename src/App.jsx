@@ -393,7 +393,7 @@ export default function App() {
         cacheBust: true,
         width: targetWidth,
         height: targetHeight,
-        style: { width: `${targetWidth}px` },
+        style: { width: `${targetWidth}px`, maxWidth: 'none' },
       });
 
       const link = document.createElement('a');
@@ -550,11 +550,11 @@ export default function App() {
           <div className="hc-rings">
             <div className="hc-ring-block">
               <p className="hc-ring-title">Kondisi Saat ini</p>
-              <ProgressRing pct={stats.pct} color="#0B6E4F" label="terisi" />
+              <ProgressRing pct={stats.pct} color="#0B6E4F" label="terisi" size={168} stroke={13} />
             </div>
             <div className="hc-ring-block">
               <p className="hc-ring-title">Potensi setelah asesmen</p>
-              <ProgressRing pct={stats.predictedFillPct} color="#C9A227" label="prediksi" size={106} stroke={9} />
+              <ProgressRing pct={stats.predictedFillPct} color="#C9A227" label="prediksi" size={132} stroke={11} />
             </div>
           </div>
           <div className="hc-chips">
