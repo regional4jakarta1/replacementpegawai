@@ -241,6 +241,30 @@ h1, h2, .hc-numeric {
 }
 .hc-filter-reset:hover { background: var(--warn-soft); color: var(--warn); }
 .hc-filter-count { font-size: 11.5px; color: var(--muted); margin: 0 0 10px 0; }
+.hc-col-toggle { position: relative; }
+.hc-col-btn { padding: 7px 12px; font-size: 12.5px; }
+.hc-col-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  box-shadow: 0 6px 20px rgba(20, 35, 31, 0.12);
+  z-index: 10;
+  min-width: 170px;
+}
+.hc-col-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  padding: 5px 0;
+  cursor: pointer;
+  color: var(--ink);
+}
+.hc-col-menu-item input { cursor: pointer; }
 
 .hc-footer {
   display: flex;

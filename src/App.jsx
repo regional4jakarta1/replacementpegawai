@@ -1,13 +1,21 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import { doc, onSnapshot, setDoc } from 'firebase/firestore';
-import { Upload, Download, FileSpreadsheet, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Upload, Download, FileSpreadsheet, AlertTriangle, CheckCircle2, EyeOff } from 'lucide-react';
 import { db, DASHBOARD_DOC_PATH } from './firebase';
 import { SEED_RECORDS, SEED_CANDIDATES } from './seedData';
 
 const MONTHS_ID = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
 const RECOMMENDED_LABEL = 'Direkomendasikan';
 const CONVERSION_RATIO = 3; // asumsi historis: 1 penempatan berhasil dari setiap 3 kandidat direkomendasikan
+const UNFILLED_COLUMNS = [
+  { key: 'jabatan', label: 'Posisi' },
+  { key: 'unit', label: 'Unit' },
+  { key: 'area', label: 'Area' },
+  { key: 'ket', label: 'Alasan' },
+  { key: 'tmt', label: 'Tgl. efektif' },
+  { key: 'status', label: 'Status' },
+];
 
 function isFilled(record) {
   return !!(record.kandidat && String(record.kandidat).trim() !== '');
@@ -225,6 +233,11 @@ export default function App() {
   const [filterAlasan, setFilterAlasan] = useState('');
   const [sortKey, setSortKey] = useState('tmt');
   const [sortDir, setSortDir] = useState('asc');
+  const [visibleColumns, setVisibleColumns] = useState({
+    jabatan: true, unit: true, area: true, ket: true, tmt: true, status: true,
+  });
+  const [showColumnMenu, setShowColumnMenu] = useState(false);
+  const columnMenuRef = useRef(null);
   const fileInputRef = useRef(null);
   const dashboardRef = useRef(null);
 
@@ -323,6 +336,25 @@ export default function App() {
     return sortDir === 'asc' ? ' \u25B2' : ' \u25BC';
   }
 
+  function toggleColumn(key) {
+    setVisibleColumns((prev) => {
+      const next = { ...prev, [key]: !prev[key] };
+      const anyVisible = Object.values(next).some(Boolean);
+      return anyVisible ? next : prev; // jangan biarin semua kolom ke-hide
+    });
+  }
+
+  useEffect(() => {
+    if (!showColumnMenu) return;
+    function handleClickOutside(e) {
+      if (columnMenuRef.current && !columnMenuRef.current.contains(e.target)) {
+        setShowColumnMenu(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showColumnMenu]);
+
   async function handleDownloadImage() {
     const node = dashboardRef.current;
     if (!node || isExporting) return;
@@ -330,7 +362,7 @@ export default function App() {
     setIsExporting(true);
     try {
       const clone = node.cloneNode(true);
-      clone.querySelectorAll('.hc-header-actions, input[type="file"], .hc-toast, .hc-error').forEach((el) => el.remove());
+      clone.querySelectorAll('.hc-header-actions, input[type="file"], .hc-toast, .hc-error, .hc-col-toggle').forEach((el) => el.remove());
       clone.style.margin = '0';
 
       let maxTableWidth = 0;
@@ -630,6 +662,25 @@ export default function App() {
                     <option key={a} value={a}>{a}</option>
                   ))}
                 </select>
+                <div className="hc-col-toggle" ref={columnMenuRef}>
+                  <button className="hc-btn hc-btn-outline hc-col-btn" onClick={() => setShowColumnMenu((s) => !s)}>
+                    <EyeOff size={14} /> Kolom
+                  </button>
+                  {showColumnMenu && (
+                    <div className="hc-col-menu">
+                      {UNFILLED_COLUMNS.map((col) => (
+                        <label key={col.key} className="hc-col-menu-item">
+                          <input
+                            type="checkbox"
+                            checked={visibleColumns[col.key]}
+                            onChange={() => toggleColumn(col.key)}
+                          />
+                          {col.label}
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 {hasActiveFilter && (
                   <button
                     className="hc-filter-reset"
@@ -649,23 +700,23 @@ export default function App() {
                   <table className="hc-table">
                     <thead>
                       <tr>
-                        <th className="hc-th-sortable" onClick={() => toggleSort('jabatan')}>Posisi{sortIndicator('jabatan')}</th>
-                        <th className="hc-th-sortable" onClick={() => toggleSort('unit')}>Unit{sortIndicator('unit')}</th>
-                        <th className="hc-th-sortable" onClick={() => toggleSort('area')}>Area{sortIndicator('area')}</th>
-                        <th className="hc-th-sortable" onClick={() => toggleSort('ket')}>Alasan{sortIndicator('ket')}</th>
-                        <th className="hc-th-sortable" onClick={() => toggleSort('tmt')}>Tgl. efektif{sortIndicator('tmt')}</th>
-                        <th className="hc-th-sortable" onClick={() => toggleSort('status')}>Status{sortIndicator('status')}</th>
+                        {visibleColumns.jabatan && <th className="hc-th-sortable" onClick={() => toggleSort('jabatan')}>Posisi{sortIndicator('jabatan')}</th>}
+                        {visibleColumns.unit && <th className="hc-th-sortable" onClick={() => toggleSort('unit')}>Unit{sortIndicator('unit')}</th>}
+                        {visibleColumns.area && <th className="hc-th-sortable" onClick={() => toggleSort('area')}>Area{sortIndicator('area')}</th>}
+                        {visibleColumns.ket && <th className="hc-th-sortable" onClick={() => toggleSort('ket')}>Alasan{sortIndicator('ket')}</th>}
+                        {visibleColumns.tmt && <th className="hc-th-sortable" onClick={() => toggleSort('tmt')}>Tgl. efektif{sortIndicator('tmt')}</th>}
+                        {visibleColumns.status && <th className="hc-th-sortable" onClick={() => toggleSort('status')}>Status{sortIndicator('status')}</th>}
                       </tr>
                     </thead>
                     <tbody>
                       {displayedUnfilled.map((r, i) => (
                         <tr key={i}>
-                          <td>{r.jabatan || '\u2014'}</td>
-                          <td>{r.unit || '\u2014'}</td>
-                          <td>{r.area || '\u2014'}</td>
-                          <td>{r.ket || '\u2014'}</td>
-                          <td>{formatDateID(r.tmt)}</td>
-                          <td><span className={`hc-status hc-status-${r.status.tone}`}>{r.status.label}</span></td>
+                          {visibleColumns.jabatan && <td>{r.jabatan || '\u2014'}</td>}
+                          {visibleColumns.unit && <td>{r.unit || '\u2014'}</td>}
+                          {visibleColumns.area && <td>{r.area || '\u2014'}</td>}
+                          {visibleColumns.ket && <td>{r.ket || '\u2014'}</td>}
+                          {visibleColumns.tmt && <td>{formatDateID(r.tmt)}</td>}
+                          {visibleColumns.status && <td><span className={`hc-status hc-status-${r.status.tone}`}>{r.status.label}</span></td>}
                         </tr>
                       ))}
                     </tbody>
