@@ -134,14 +134,14 @@ h1, h2, .hc-numeric {
 .hc-ring-label { fill: var(--muted); }
 
 .hc-chips {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  column-gap: 56px;
-  row-gap: 30px;
-  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
   align-content: center;
+  row-gap: 30px;
+  column-gap: 56px;
+  flex: 1;
 }
-.hc-chip { min-width: 150px; }
+.hc-chip { flex: 0 0 calc(50% - 28px); min-width: 150px; }
 .hc-chip-value {
   display: block;
   font-size: 66px;
@@ -305,4 +305,5 @@ h1, h2, .hc-numeric {
 @media (max-width: 760px) {
   .hc-hero { flex-direction: column; align-items: flex-start; }
   .hc-chips { display: flex; flex-direction: column; flex: none; }
+  .hc-chip { flex-basis: auto; }
 }
