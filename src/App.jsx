@@ -9,6 +9,22 @@ import { SEED_RECORDS, SEED_CANDIDATES } from './seedData';
 const MONTHS_ID = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
 const RECOMMENDED_LABEL = 'Direkomendasikan';
 const CONVERSION_RATIO = 3; // asumsi historis: 1 penempatan berhasil dari setiap 3 kandidat direkomendasikan
+const KNOWN_REASONS = ['Resign', 'Pensiun', 'PHK', 'Meninggal', 'Cabang Baru'];
+const REASON_COLORS = {
+  Resign: '#0B6E4F',
+  Pensiun: '#3E8E6E',
+  PHK: '#8FA98C',
+  Meninggal: '#5B6B63',
+  'Cabang Baru': '#C9A227',
+  Lainnya: '#B5502C',
+  'Tidak diketahui': '#B9C2BB',
+};
+
+function normalizeReason(ket) {
+  if (!ket) return 'Tidak diketahui';
+  const trimmed = String(ket).trim();
+  return KNOWN_REASONS.includes(trimmed) ? trimmed : 'Lainnya';
+}
 const UNFILLED_COLUMNS = [
   { key: 'jabatan', label: 'Posisi' },
   { key: 'unit', label: 'Unit' },
@@ -374,7 +390,28 @@ export default function App() {
         el.style.flexDirection = 'row';
         el.style.alignItems = 'center';
       });
+      clone.querySelectorAll('.hc-hero-top').forEach((el) => {
+        el.style.flexDirection = 'row';
+        el.style.alignItems = 'center';
+      });
+      clone.querySelectorAll('.hc-vacant-reason').forEach((el) => {
+        el.style.borderLeft = '1px solid #DCE3DC';
+        el.style.borderTop = 'none';
+        el.style.paddingLeft = '32px';
+        el.style.paddingTop = '0';
+        el.style.width = 'auto';
+      });
+      clone.querySelectorAll('.hc-chips').forEach((el) => {
+        el.style.flexDirection = 'row';
+        el.style.width = '420px';
+      });
+      clone.querySelectorAll('.hc-chip').forEach((el) => {
+        el.style.width = '190px';
+      });
       clone.style.margin = '0';
+      // Lepas batas lebar card SEBELUM diukur, biar pengukuran di bawah
+      // mencerminkan lebar asli yang dibutuhkan (bukan kepotong batas lama).
+      clone.style.maxWidth = 'none';
 
       // Tempel clone-nya di luar layar (gak keliatan sama sekali oleh user)
       // biar browser beneran ngukur & nge-layout-in dia dengan benar.
@@ -394,7 +431,6 @@ export default function App() {
       const targetWidth = Math.max(Math.ceil(naturalWidth), maxTableWidth + 120);
 
       // Lebarin clone-nya langsung (bukan lewat opsi library), biar dijamin kepake.
-      clone.style.maxWidth = 'none';
       clone.style.width = `${targetWidth}px`;
       const targetHeight = Math.ceil(clone.getBoundingClientRect().height);
 
@@ -470,12 +506,22 @@ export default function App() {
         return new Date(a.tmt) - new Date(b.tmt);
       });
 
+    const reasonMap = new Map();
+    records.forEach((r) => {
+      const key = normalizeReason(r.ket);
+      reasonMap.set(key, (reasonMap.get(key) || 0) + 1);
+    });
+    const reasonData = Array.from(reasonMap.entries())
+      .map(([reason, value]) => ({ reason, value }))
+      .sort((a, b) => b.value - a.value);
+
     const totalPredictedFill = Math.min(unfilled, Math.floor(totalRecommended / CONVERSION_RATIO));
     const totalCandidateGap = Math.max(0, unfilled * CONVERSION_RATIO - totalRecommended);
     const predictedFillPct = unfilled > 0 ? Math.round((totalPredictedFill / unfilled) * 100) : 100;
+    const maxReasonValue = reasonData.reduce((max, r) => Math.max(max, r.value), 1);
 
     return {
-      total, filled, unfilled, pct, areaData, unfilledList,
+      total, filled, unfilled, pct, areaData, unfilledList, reasonData, maxReasonValue,
       totalRecommended, totalPredictedFill, totalCandidateGap, predictedFillPct,
     };
   }, [records, candidates]);
@@ -556,32 +602,54 @@ export default function App() {
         </header>
 
         <div className="hc-hero">
-          <div className="hc-rings">
-            <div className="hc-ring-block">
-              <p className="hc-ring-title">Kondisi Saat ini</p>
-              <ProgressRing pct={stats.pct} color="#0B6E4F" label="terisi" size={224} stroke={17} />
+          <div className="hc-hero-top">
+            <div className="hc-rings">
+              <div className="hc-ring-block">
+                <p className="hc-ring-title">Kondisi Saat ini</p>
+                <ProgressRing pct={stats.pct} color="#0B6E4F" label="terisi" size={224} stroke={17} />
+              </div>
+              <div className="hc-ring-block">
+                <p className="hc-ring-title">Potensi setelah asesmen</p>
+                <ProgressRing pct={stats.predictedFillPct} color="#C9A227" label="prediksi" size={178} stroke={14} />
+              </div>
             </div>
-            <div className="hc-ring-block">
-              <p className="hc-ring-title">Potensi setelah asesmen</p>
-              <ProgressRing pct={stats.predictedFillPct} color="#C9A227" label="prediksi" size={178} stroke={14} />
+            <div className="hc-chips">
+              <div className="hc-chip">
+                <span className="hc-chip-value">{stats.total}</span>
+                <span className="hc-chip-label">Total Headcount</span>
+              </div>
+              <div className="hc-chip">
+                <span className="hc-chip-value is-primary">{stats.filled}</span>
+                <span className="hc-chip-label">Sudah terisi</span>
+              </div>
+              <div className="hc-chip">
+                <span className="hc-chip-value is-warn">{stats.unfilled}</span>
+                <span className="hc-chip-label">Belum terisi</span>
+              </div>
+              <div className="hc-chip">
+                <span className="hc-chip-value is-gold">{stats.totalRecommended}</span>
+                <span className="hc-chip-label">Kandidat</span>
+              </div>
             </div>
           </div>
-          <div className="hc-chips">
-            <div className="hc-chip">
-              <span className="hc-chip-value">{stats.total}</span>
-              <span className="hc-chip-label">Total Headcount</span>
-            </div>
-            <div className="hc-chip">
-              <span className="hc-chip-value is-primary">{stats.filled}</span>
-              <span className="hc-chip-label">Sudah terisi</span>
-            </div>
-            <div className="hc-chip">
-              <span className="hc-chip-value is-warn">{stats.unfilled}</span>
-              <span className="hc-chip-label">Belum terisi</span>
-            </div>
-            <div className="hc-chip">
-              <span className="hc-chip-value is-gold">{stats.totalRecommended}</span>
-              <span className="hc-chip-label">Kandidat</span>
+          <div className="hc-vacant-reason">
+            <h3 className="hc-vacant-reason-title">Vacant Reason</h3>
+            <div className="hc-bar-list">
+              {stats.reasonData.map((r) => (
+                <div className="hc-bar-row" key={r.reason}>
+                  <span className="hc-bar-label">{r.reason}</span>
+                  <div className="hc-bar-track">
+                    <div
+                      className="hc-bar-fill"
+                      style={{
+                        width: `${(r.value / stats.maxReasonValue) * 100}%`,
+                        background: REASON_COLORS[r.reason] || '#8FA98C',
+                      }}
+                    />
+                  </div>
+                  <span className="hc-bar-value">{r.value}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
