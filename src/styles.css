@@ -106,13 +106,14 @@ h1, h2, .hc-numeric {
 .hc-hero-top {
   display: flex;
   align-items: center;
-  gap: 22px;
+  gap: 34px;
   flex-wrap: wrap;
 }
 .hc-vacant-reason {
   border-left: 1px solid var(--border);
   padding-left: 22px;
   min-width: 300px;
+  flex: 1;
 }
 .hc-vacant-reason-title {
   font-family: 'Space Grotesk', sans-serif;
@@ -352,6 +353,7 @@ h1, h2, .hc-numeric {
     padding-left: 0;
     padding-top: 24px;
     width: 100%;
+    flex: none;
   }
   .hc-chips { display: flex; flex-direction: column; width: auto; }
   .hc-chip { width: auto; }

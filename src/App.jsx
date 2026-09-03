@@ -400,6 +400,7 @@ export default function App() {
         el.style.paddingLeft = '22px';
         el.style.paddingTop = '0';
         el.style.width = 'auto';
+        el.style.flex = '1';
       });
       clone.querySelectorAll('.hc-chips').forEach((el) => {
         el.style.flexDirection = 'row';
