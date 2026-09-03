@@ -397,16 +397,16 @@ export default function App() {
       clone.querySelectorAll('.hc-vacant-reason').forEach((el) => {
         el.style.borderLeft = '1px solid #DCE3DC';
         el.style.borderTop = 'none';
-        el.style.paddingLeft = '32px';
+        el.style.paddingLeft = '22px';
         el.style.paddingTop = '0';
         el.style.width = 'auto';
       });
       clone.querySelectorAll('.hc-chips').forEach((el) => {
         el.style.flexDirection = 'row';
-        el.style.width = '420px';
+        el.style.width = '380px';
       });
       clone.querySelectorAll('.hc-chip').forEach((el) => {
-        el.style.width = '190px';
+        el.style.width = '176px';
       });
       clone.style.margin = '0';
       // Lepas batas lebar card SEBELUM diukur, biar pengukuran di bawah

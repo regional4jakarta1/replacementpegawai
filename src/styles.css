@@ -95,7 +95,7 @@ h1, h2, .hc-numeric {
 .hc-hero {
   display: flex;
   align-items: center;
-  gap: 32px;
+  gap: 22px;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 14px;
@@ -106,48 +106,48 @@ h1, h2, .hc-numeric {
 .hc-hero-top {
   display: flex;
   align-items: center;
-  gap: 32px;
+  gap: 22px;
   flex-wrap: wrap;
 }
 .hc-vacant-reason {
   border-left: 1px solid var(--border);
-  padding-left: 32px;
-  min-width: 210px;
+  padding-left: 22px;
+  min-width: 300px;
 }
 .hc-vacant-reason-title {
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 600;
   color: var(--ink);
-  margin: 0 0 12px 0;
+  margin: 0 0 16px 0;
 }
-.hc-bar-list { display: flex; flex-direction: column; gap: 10px; }
-.hc-bar-row { display: flex; align-items: center; gap: 10px; }
-.hc-bar-label { width: 92px; flex-shrink: 0; font-size: 12px; color: var(--ink); }
+.hc-bar-list { display: flex; flex-direction: column; gap: 14px; }
+.hc-bar-row { display: flex; align-items: center; gap: 14px; }
+.hc-bar-label { width: 120px; flex-shrink: 0; font-size: 15px; color: var(--ink); }
 .hc-bar-track {
   flex: 1;
-  height: 12px;
+  height: 18px;
   background: var(--canvas);
-  border-radius: 8px;
+  border-radius: 9px;
   overflow: hidden;
 }
 .hc-bar-fill {
   height: 100%;
-  border-radius: 8px;
+  border-radius: 9px;
   transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .hc-bar-value {
-  width: 24px;
+  width: 32px;
   flex-shrink: 0;
   text-align: right;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 16px;
   color: var(--ink);
 }
 .hc-rings {
   display: flex;
   align-items: flex-start;
-  gap: 28px;
+  gap: 20px;
   flex-wrap: wrap;
 }
 .hc-ring-block {
@@ -178,11 +178,11 @@ h1, h2, .hc-numeric {
   display: flex;
   flex-wrap: wrap;
   align-content: center;
-  row-gap: 24px;
-  column-gap: 40px;
-  width: 420px;
+  row-gap: 18px;
+  column-gap: 28px;
+  width: 380px;
 }
-.hc-chip { width: 190px; }
+.hc-chip { width: 176px; }
 .hc-chip-value {
   display: block;
   font-size: 66px;
