@@ -133,11 +133,18 @@ h1, h2, .hc-numeric {
 }
 .hc-ring-label { fill: var(--muted); }
 
-.hc-chips { display: flex; gap: 40px; flex-wrap: wrap; flex: 1; justify-content: space-between; }
-.hc-chip { min-width: 145px; }
+.hc-chips {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 56px;
+  row-gap: 30px;
+  flex: 1;
+  align-content: center;
+}
+.hc-chip { min-width: 150px; }
 .hc-chip-value {
   display: block;
-  font-size: 54px;
+  font-size: 66px;
   font-weight: 700;
   line-height: 1.1;
 }
@@ -146,7 +153,7 @@ h1, h2, .hc-numeric {
 .hc-chip-value.is-gold { color: var(--gold); }
 .hc-chip-label {
   display: block;
-  font-size: 16px;
+  font-size: 17px;
   color: var(--muted);
   margin-top: 6px;
 }
@@ -297,5 +304,5 @@ h1, h2, .hc-numeric {
 
 @media (max-width: 760px) {
   .hc-hero { flex-direction: column; align-items: flex-start; }
-  .hc-chips { flex: none; justify-content: flex-start; }
+  .hc-chips { display: flex; flex-direction: column; flex: none; }
 }

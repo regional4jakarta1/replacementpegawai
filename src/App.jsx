@@ -559,11 +559,11 @@ export default function App() {
           <div className="hc-rings">
             <div className="hc-ring-block">
               <p className="hc-ring-title">Kondisi Saat ini</p>
-              <ProgressRing pct={stats.pct} color="#0B6E4F" label="terisi" size={192} stroke={15} />
+              <ProgressRing pct={stats.pct} color="#0B6E4F" label="terisi" size={224} stroke={17} />
             </div>
             <div className="hc-ring-block">
               <p className="hc-ring-title">Potensi setelah asesmen</p>
-              <ProgressRing pct={stats.predictedFillPct} color="#C9A227" label="prediksi" size={152} stroke={12} />
+              <ProgressRing pct={stats.predictedFillPct} color="#C9A227" label="prediksi" size={178} stroke={14} />
             </div>
           </div>
           <div className="hc-chips">
