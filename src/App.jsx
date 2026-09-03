@@ -367,6 +367,13 @@ export default function App() {
       const clone = node.cloneNode(true);
       clone.querySelectorAll('.hc-header-actions, input[type="file"], .hc-toast, .hc-error, .hc-col-toggle').forEach((el) => el.remove());
       clone.querySelectorAll('.hc-table-scroll').forEach((el) => { el.style.overflow = 'visible'; });
+      // Kalau diakses dari HP, ada aturan tampilan "mode HP" yang otomatis
+      // aktif berdasarkan lebar layar HP-nya, bukan lebar clone ini. Dipaksa
+      // pakai tampilan "mode desktop" biar hasil gambarnya selalu konsisten.
+      clone.querySelectorAll('.hc-hero').forEach((el) => {
+        el.style.flexDirection = 'row';
+        el.style.alignItems = 'center';
+      });
       clone.style.margin = '0';
 
       // Tempel clone-nya di luar layar (gak keliatan sama sekali oleh user)
@@ -552,11 +559,11 @@ export default function App() {
           <div className="hc-rings">
             <div className="hc-ring-block">
               <p className="hc-ring-title">Kondisi Saat ini</p>
-              <ProgressRing pct={stats.pct} color="#0B6E4F" label="terisi" size={168} stroke={13} />
+              <ProgressRing pct={stats.pct} color="#0B6E4F" label="terisi" size={192} stroke={15} />
             </div>
             <div className="hc-ring-block">
               <p className="hc-ring-title">Potensi setelah asesmen</p>
-              <ProgressRing pct={stats.predictedFillPct} color="#C9A227" label="prediksi" size={132} stroke={11} />
+              <ProgressRing pct={stats.predictedFillPct} color="#C9A227" label="prediksi" size={152} stroke={12} />
             </div>
           </div>
           <div className="hc-chips">
@@ -585,7 +592,7 @@ export default function App() {
             : ' Kandidat yang ada saat ini diperkirakan cukup untuk menutup sisa Headcount yang belum terisi.'}
         </p>
 
-        <section className="hc-panel">
+        <section className="hc-panel hc-panel-lg">
           <div className="hc-panel-header">
             <h2>Progres per area</h2>
             <p className="hc-panel-sub">

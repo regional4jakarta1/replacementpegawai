@@ -50,13 +50,13 @@ h1, h2, .hc-numeric {
   margin-bottom: 26px;
 }
 .hc-title {
-  font-size: 30px;
+  font-size: 38px;
   font-weight: 600;
-  margin: 0 0 4px 0;
+  margin: 0 0 6px 0;
   letter-spacing: -0.01em;
 }
 .hc-subtitle {
-  font-size: 14.5px;
+  font-size: 16px;
   color: var(--muted);
   margin: 0;
 }
@@ -95,28 +95,28 @@ h1, h2, .hc-numeric {
 .hc-hero {
   display: flex;
   align-items: center;
-  gap: 40px;
+  gap: 44px;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 14px;
-  padding: 32px 36px;
+  padding: 40px 44px;
   margin-bottom: 8px;
   flex-wrap: wrap;
 }
 .hc-rings {
   display: flex;
   align-items: flex-start;
-  gap: 32px;
+  gap: 36px;
   flex-wrap: wrap;
 }
 .hc-ring-block {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 .hc-ring-title {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
   color: var(--muted);
   margin: 0;
@@ -133,11 +133,11 @@ h1, h2, .hc-numeric {
 }
 .hc-ring-label { fill: var(--muted); }
 
-.hc-chips { display: flex; gap: 36px; flex-wrap: wrap; }
-.hc-chip { min-width: 130px; }
+.hc-chips { display: flex; gap: 40px; flex-wrap: wrap; }
+.hc-chip { min-width: 145px; }
 .hc-chip-value {
   display: block;
-  font-size: 42px;
+  font-size: 54px;
   font-weight: 700;
   line-height: 1.1;
 }
@@ -146,14 +146,14 @@ h1, h2, .hc-numeric {
 .hc-chip-value.is-gold { color: var(--gold); }
 .hc-chip-label {
   display: block;
-  font-size: 14px;
+  font-size: 16px;
   color: var(--muted);
-  margin-top: 4px;
+  margin-top: 6px;
 }
 .hc-hero-note {
-  font-size: 13px;
+  font-size: 15px;
   color: var(--muted);
-  margin: 12px 0 22px 0;
+  margin: 14px 0 24px 0;
 }
 
 .hc-panel {
@@ -166,6 +166,13 @@ h1, h2, .hc-numeric {
 .hc-panel-header { margin-bottom: 14px; }
 .hc-panel-header h2 { font-size: 16px; font-weight: 600; margin: 0 0 3px 0; }
 .hc-panel-sub { font-size: 12.5px; color: var(--muted); margin: 0; }
+
+/* "Progres per area" ditampilin lebih gede dibanding tabel rincian "Belum
+   terisi", biar enak dibaca sebagai ringkasan laporan. */
+.hc-panel-lg .hc-panel-header h2 { font-size: 22px; }
+.hc-panel-lg .hc-panel-sub { font-size: 14.5px; }
+.hc-panel-lg .hc-table th { font-size: 13.5px; padding: 10px 14px; }
+.hc-panel-lg .hc-table td { font-size: 16px; padding: 13px 14px; }
 
 .hc-table-scroll { overflow-x: auto; }
 .hc-table { width: 100%; border-collapse: collapse; font-size: 13px; }
